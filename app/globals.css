@@ -1659,6 +1659,12 @@ video {
     -webkit-text-stroke: 1px #FFFFFF;
   }
 
+  .about-hero-dot {
+    width: clamp(1.4rem, 4.2vw, 2.1rem);
+    height: clamp(1.4rem, 4.2vw, 2.1rem);
+    margin-right: clamp(0.35rem, 1vw, 0.75rem);
+  }
+
   .about-hero-intro {
     align-items: flex-start;
     text-align: left;
@@ -3493,7 +3499,21 @@ video {
   gap: clamp(1.5rem, 2.2vw, 2.5rem);
 }
 
-@media (min-width: 600px) {
+@media (max-width: 767px) {
+  .agency-evolve__row--top {
+    display: none;
+  }
+
+  .agency-evolve__row-photos {
+    display: none;
+  }
+
+  .agency-evolve__text-side {
+    padding: 0;
+  }
+}
+
+@media (min-width: 768px) {
   .agency-evolve__row-photos {
     grid-template-columns: repeat(2, 1fr);
   }
