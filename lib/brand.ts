@@ -1,3 +1,7 @@
+/**
+ * Brand Configuration & Metadata Constants
+ * Defines global brand identity tokens, chemical formula tags, and SEO descriptors.
+ */
 export const brand = {
   name: 'DOPAMINE',
   separator: '·',
@@ -6,10 +10,10 @@ export const brand = {
   tagline: 'FEEL EVERY FRAME.',
   subTagline: 'NEURO-CINEMATIC MASTERPIECE REEL',
   description:
-    'A high-fashion cinema lab exploring the intersection of neuro-chemical resonance and living visual media. Six sequences. One pulse.',
+    'A high-fashion cinema lab exploring the intersection of neuro-chemical resonance and living visual media. Four sequences. One pulse.',
   meta: {
-    title: 'DOPAMINE [ C8H11NO2 ] — Neuro-Cinematic Showcase',
+    title: 'Dopamine studio',
     ogDescription:
-      'A fullscreen showcase reel where cinema meets living interface. Six sequences. Ambient sound. Infinite resonance.',
+      'A fullscreen showcase reel where cinema meets living interface. Four sequences. Ambient sound. Infinite resonance.',
   },
-};
+} as const;

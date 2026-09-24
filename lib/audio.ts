@@ -11,7 +11,7 @@ interface ReelSoundProfile {
 }
 
 const REEL_PROFILES: ReelSoundProfile[] = [
-  // Reel 0 (Sequence Beta): Deep cinematic D-minor tension drone
+  // Sequence Beta: D-minor cinematic tension drone
   {
     name: 'Sequence Beta',
     baseFreqs: [36.71, 55.0, 73.42, 110.0, 146.83],
@@ -21,7 +21,7 @@ const REEL_PROFILES: ReelSoundProfile[] = [
     pulseBpm: 46,
     pulseFreq: 45,
   },
-  // Reel 1 (Sequence Gamma): Kinetic F#-minor driving rhythm and modular atmosphere
+  // Sequence Gamma: F#-minor kinetic driving rhythm
   {
     name: 'Sequence Gamma',
     baseFreqs: [92.5, 138.59, 185.0, 220.0, 277.18],
@@ -31,7 +31,7 @@ const REEL_PROFILES: ReelSoundProfile[] = [
     pulseBpm: 120,
     pulseFreq: 68,
   },
-  // Reel 2 (Sequence Delta): Luminous A-major ambient space & celestial resolution
+  // Sequence Delta: A-major celestial ambient soundscape
   {
     name: 'Sequence Delta',
     baseFreqs: [110.0, 164.81, 220.0, 277.18, 329.63],
@@ -55,6 +55,8 @@ class AmbientAudioEngine {
   private pulseOsc: OscillatorNode | null = null;
   private pulseGain: GainNode | null = null;
   private pulseLfo: OscillatorNode | null = null;
+  private bgMusic: HTMLAudioElement | null = null;
+  private isReelAudioActive = false;
   private listeners: ((playing: boolean) => void)[] = [];
 
   private initContext() {
@@ -68,6 +70,14 @@ class AmbientAudioEngine {
     }
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume();
+    }
+
+    if (!this.bgMusic) {
+      try {
+        this.bgMusic = new Audio('/media/ambient-music.mp3');
+        this.bgMusic.loop = true;
+        this.bgMusic.volume = 0.35;
+      } catch {}
     }
   }
 
@@ -91,6 +101,23 @@ class AmbientAudioEngine {
     return this.isPlaying;
   }
 
+  public setReelAudioPlaying(active: boolean) {
+    this.isReelAudioActive = active;
+    if (active) {
+      if (this.bgMusic) this.bgMusic.pause();
+      if (this.masterGain && this.ctx) {
+        this.masterGain.gain.setTargetAtTime(0.001, this.ctx.currentTime, 0.1);
+      }
+    } else {
+      if (this.isPlaying && this.bgMusic) {
+        this.bgMusic.play().catch(() => {});
+      }
+      if (this.isPlaying && this.masterGain && this.ctx) {
+        this.masterGain.gain.setTargetAtTime(0.35, this.ctx.currentTime, 0.4);
+      }
+    }
+  }
+
   public subscribe(fn: (playing: boolean) => void) {
     this.listeners.push(fn);
     return () => {
@@ -109,6 +136,12 @@ class AmbientAudioEngine {
 
       this.stop();
 
+      // Start background ambient music track
+      if (this.bgMusic && !this.isReelAudioActive) {
+        this.bgMusic.currentTime = 0;
+        this.bgMusic.play().catch(() => {});
+      }
+
       const now = this.ctx.currentTime;
       const profile = REEL_PROFILES[this.currentReelIndex] || REEL_PROFILES[0];
 
@@ -118,14 +151,14 @@ class AmbientAudioEngine {
       this.masterGain.gain.exponentialRampToValueAtTime(0.35, now + 1.2);
       this.masterGain.connect(this.ctx.destination);
 
-      // Resonant shaping filter
+      // Lowpass resonance filter
       this.filter = this.ctx.createBiquadFilter();
       this.filter.type = 'lowpass';
       this.filter.frequency.setValueAtTime(profile.filterFreq, now);
       this.filter.Q.setValueAtTime(profile.filterQ, now);
       this.filter.connect(this.masterGain);
 
-      // Slow organic modulation LFO
+      // LFO filter sweep modulation
       this.lfo = this.ctx.createOscillator();
       this.lfo.frequency.setValueAtTime(0.08, now);
       const lfoGain = this.ctx.createGain();
@@ -134,7 +167,7 @@ class AmbientAudioEngine {
       lfoGain.connect(this.filter.frequency);
       this.lfo.start(now);
 
-      // Polyphonic chord oscillators
+      // Harmonic chord oscillators
       this.oscillators = [];
       this.oscGains = [];
 
@@ -155,7 +188,7 @@ class AmbientAudioEngine {
         this.oscGains.push(oscGain);
       });
 
-      // Rhythmic sub-pulse generator
+      // Sub-bass pulse generator
       this.pulseOsc = this.ctx.createOscillator();
       this.pulseOsc.type = 'sine';
       this.pulseOsc.frequency.setValueAtTime(profile.pulseFreq, now);
@@ -185,6 +218,12 @@ class AmbientAudioEngine {
   }
 
   public stop() {
+    if (this.bgMusic) {
+      try {
+        this.bgMusic.pause();
+      } catch {}
+    }
+
     if (!this.ctx || !this.masterGain) {
       this.isPlaying = false;
       this.notify();
@@ -239,7 +278,7 @@ class AmbientAudioEngine {
   }
 
   /**
-   * Seamlessly morph audio synthesis to match the active reel's soundscape
+   * Interpolates synthesizer parameters to match the target reel profile
    */
   public setReelTone(reelIndex: number) {
     this.currentReelIndex = Math.max(0, Math.min(reelIndex, REEL_PROFILES.length - 1));
@@ -251,11 +290,11 @@ class AmbientAudioEngine {
       const now = this.ctx.currentTime;
       const profile = REEL_PROFILES[this.currentReelIndex];
 
-      // Smooth filter morph
+      // Interpolate filter cutoff
       this.filter.frequency.exponentialRampToValueAtTime(profile.filterFreq, now + 0.5);
       this.filter.Q.exponentialRampToValueAtTime(profile.filterQ, now + 0.5);
 
-      // Pitch glide oscillators to the reel's harmonic chord
+      // Pitch glide oscillators to target harmonic chord
       this.oscillators.forEach((osc, i) => {
         if (profile.baseFreqs[i]) {
           osc.frequency.exponentialRampToValueAtTime(profile.baseFreqs[i], now + 0.6);
@@ -263,7 +302,7 @@ class AmbientAudioEngine {
         }
       });
 
-      // Update pulse rate and tone
+      // Retune sub-bass rhythm
       if (this.pulseOsc) {
         this.pulseOsc.frequency.exponentialRampToValueAtTime(profile.pulseFreq, now + 0.5);
       }
@@ -274,7 +313,7 @@ class AmbientAudioEngine {
   }
 
   /**
-   * Tactile mechanical film-reel transition sound
+   * Generates a tactile mechanical film-shutter audio transient
    */
   public playReelGlideSound() {
     try {
@@ -283,7 +322,7 @@ class AmbientAudioEngine {
 
       const now = this.ctx.currentTime;
 
-      // Filtered noise sweep
+      // Filtered noise burst
       const bufferSize = Math.floor(this.ctx.sampleRate * 0.15);
       const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -311,7 +350,7 @@ class AmbientAudioEngine {
       noise.start(now);
       noise.stop(now + 0.16);
 
-      // Low frequency mechanical thud
+      // Low-frequency impact transient
       const thud = this.ctx.createOscillator();
       const thudGain = this.ctx.createGain();
       thud.type = 'sine';

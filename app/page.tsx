@@ -2,30 +2,34 @@
 
 import React, { useState, useCallback } from 'react';
 import { Loader } from '@/components/Loader';
+import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
-import { Reels } from '@/components/Reels';
-import { Contact } from '@/components/Contact';
+import { ShowcaseReel } from '@/components/ShowcaseReel';
+import { AgencySection } from '@/components/AgencySection';
+import { LatestWork } from '@/components/LatestWork';
 import { Footer } from '@/components/Footer';
 import { CustomCursor } from '@/components/CustomCursor';
-import { audioEngine } from '@/lib/audio';
 
+/**
+ * Dopamine Studio Main Landing Page
+ * Fullscreen neuro-cinematic experience combining hero typography,
+ * dynamic media showcase reel, editorial works, agency capabilities,
+ * campaign inquiries, and the studio footer.
+ */
 export default function Home() {
   const [loaderComplete, setLoaderComplete] = useState(false);
-  const [activeReelIndex, setActiveReelIndex] = useState(0);
 
-  const handleSelectReel = useCallback((index: number) => {
-    setActiveReelIndex(index);
-    audioEngine.setReelTone(index);
-    const reelsEl = document.getElementById('reels');
-    if (reelsEl) {
-      reelsEl.scrollIntoView({ behavior: 'smooth' });
+  const handleScrollToShowcase = useCallback(() => {
+    const el = document.getElementById('showcase-reel');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
     }
   }, []);
 
-  const handleExploreClick = useCallback(() => {
-    const reelsEl = document.getElementById('reels');
-    if (reelsEl) {
-      reelsEl.scrollIntoView({ behavior: 'smooth' });
+  const handleScrollToWork = useCallback(() => {
+    const el = document.getElementById('latest-work');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
     }
   }, []);
 
@@ -35,29 +39,32 @@ export default function Home() {
         Skip to main content
       </a>
 
-      {/* Monochrome Custom Cursor */}
+      {/* Fluid custom pointer */}
       <CustomCursor />
 
-      {/* Introductory Molecular Loader */}
+      {/* Molecular splash screen */}
       {!loaderComplete && (
         <Loader onComplete={() => setLoaderComplete(true)} />
       )}
 
-      <main id="main-content" className="relative w-full overflow-x-hidden bg-black">
-        {/* Studio Hero Section */}
+      {/* Sticky Navigation Header */}
+      <Header onScrollToWork={handleScrollToWork} />
+
+      <main id="main-content" className="relative w-full overflow-x-clip bg-black">
+        {/* Hero Section */}
         <Hero
-          onSelectReel={handleSelectReel}
-          onExploreClick={handleExploreClick}
+          onScrollToWork={handleScrollToWork}
+          onShowcaseClick={handleScrollToShowcase}
         />
 
-        {/* Cinematic Reels Section */}
-        <Reels
-          activeReelIndex={activeReelIndex}
-          setActiveReelIndex={setActiveReelIndex}
-        />
+        {/* Showcase Reel Section */}
+        <ShowcaseReel />
 
-        {/* Inquiries & Campaign Contact Section */}
-        <Contact />
+        {/* Latest Work Section [S.02] */}
+        <LatestWork />
+
+        {/* Agency Capabilities Section [S.03] */}
+        <AgencySection />
 
         {/* Studio Footer */}
         <Footer />

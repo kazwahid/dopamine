@@ -1,136 +1,92 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface LoaderProps {
+  /** Callback triggered once the wipe transition completes */
   onComplete: () => void;
 }
 
-const formulaChars = [
-  { char: 'C', sub: false, key: 'c1' },
-  { char: '8', sub: true, key: 'c2' },
-  { char: 'H', sub: false, key: 'c3' },
-  { char: '11', sub: true, key: 'c4' },
-  { char: 'N', sub: false, key: 'c5' },
-  { char: 'O', sub: false, key: 'c6' },
-  { char: '2', sub: true, key: 'c7' },
-];
-
+/**
+ * Brand Loader Component
+ * Minimalist brandmark introduction with seamless feathered curtain reveal.
+ */
 export function Loader({ onComplete }: LoaderProps) {
-  const [isExiting, setIsExiting] = useState(false);
+  const [phase, setPhase] = useState<'hold' | 'wipe' | 'done'>('hold');
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsExiting(true);
-      setTimeout(onComplete, 850);
-    }, 2800);
+    const holdTimer = setTimeout(() => {
+      setPhase('wipe');
+    }, 1150);
 
-    return () => clearTimeout(timer);
-  }, [onComplete]);
+    return () => clearTimeout(holdTimer);
+  }, []);
+
+  useEffect(() => {
+    if (phase === 'wipe') {
+      // Allow seamless wipe transition (1150ms) to complete before unmounting
+      const wipeTimer = setTimeout(() => {
+        setPhase('done');
+      }, 1180);
+      return () => clearTimeout(wipeTimer);
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === 'done') {
+      onComplete();
+    }
+  }, [phase, onComplete]);
+
+  if (phase === 'done') return null;
 
   return (
-    <AnimatePresence>
-      {!isExiting && (
+    <motion.div
+      className="loader-evolve"
+      initial={{ y: 0 }}
+      animate={phase === 'wipe' ? { y: '-100%' } : { y: 0 }}
+      transition={
+        phase === 'wipe'
+          ? { duration: 1.15, ease: [0.76, 0, 0.24, 1] }
+          : undefined
+      }
+      aria-hidden="true"
+    >
+      {/* Atmospheric Radial Aura */}
+      <div className="loader-evolve__aura" />
+
+      {/* Centered Brandmark */}
+      <div className="loader-evolve__center">
         <motion.div
-          key="dopamine-formula-loader"
-          initial={{ opacity: 1 }}
-          exit={{
-            opacity: 0,
-            scale: 0.98,
-            transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] },
-          }}
-          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-black select-none pointer-events-none"
-          style={{ backgroundColor: '#000000' }}
-        >
-          <div className="relative flex flex-col items-center justify-center">
-            {/* Ambient Pulse Glow */}
-            <motion.div
-              initial={{ scale: 0.7, opacity: 0 }}
-              animate={{
-                scale: [0.8, 1.25, 1],
-                opacity: [0.1, 0.3, 0.15],
-              }}
-              transition={{
-                repeat: Infinity,
-                duration: 3.6,
-                ease: 'easeInOut',
-              }}
-              className="absolute w-80 h-80 rounded-full bg-white/10 blur-3xl pointer-events-none"
-            />
-
-            {/* Formula Characters: C₈H₁₁NO₂ */}
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
+          className="loader-evolve__logo-box"
+          initial={{ opacity: 0, scale: 0.94, filter: 'blur(10px)', letterSpacing: '0.02em' }}
+          animate={
+            phase === 'wipe'
+              ? {
+                  opacity: 0,
+                  y: -38,
+                  filter: 'blur(12px)',
+                  scale: 0.98,
+                  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+                }
+              : {
                   opacity: 1,
-                  transition: {
-                    staggerChildren: 0.14,
-                    delayChildren: 0.25,
-                  },
-                },
-              }}
-              className="relative flex items-baseline font-mono text-white"
-              style={{
-                fontFamily: 'var(--font-mono)',
-              }}
-            >
-              {formulaChars.map((item) => (
-                <motion.span
-                  key={item.key}
-                  variants={{
-                    hidden: {
-                      opacity: 0,
-                      y: 22,
-                      filter: 'blur(10px)',
-                    },
-                    visible: {
-                      opacity: 1,
-                      y: 0,
-                      filter: 'blur(0px)',
-                      transition: {
-                        duration: 0.75,
-                        ease: [0.16, 1, 0.3, 1],
-                      },
-                    },
-                  }}
-                  className={
-                    item.sub
-                      ? 'text-lg sm:text-2xl md:text-3xl text-white/60 font-light -translate-y-2 align-baseline px-0.5'
-                      : 'text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight px-0.5'
-                  }
-                  style={{
-                    textShadow: '0 0 28px rgba(255, 255, 255, 0.45)',
-                  }}
-                >
-                  {item.char}
-                </motion.span>
-              ))}
-            </motion.div>
-
-            {/* Minimal Horizontal Line */}
-            <motion.div
-              initial={{ scaleX: 0, opacity: 0 }}
-              animate={{
-                scaleX: 1,
-                opacity: [0, 0.7, 0.35],
-              }}
-              transition={{
-                duration: 1.6,
-                delay: 0.8,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="w-28 sm:w-44 h-[1.5px] bg-white/50 mt-5 rounded-full"
-            />
-          </div>
+                  scale: 1.0,
+                  filter: 'blur(0px)',
+                  letterSpacing: '-0.04em',
+                  transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] },
+                }
+          }
+        >
+          <span className="loader-evolve__brand-logo">
+            dopamine<span className="loader-evolve__brand-copy">&copy;</span>
+          </span>
         </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </motion.div>
   );
 }
 
-// Alias for compatibility
 export const JamsLoader = Loader;
+

@@ -2,16 +2,23 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+/**
+ * Custom Cursor Component
+ * Provides a fluid context-aware cursor follower for fine pointer devices.
+ * Automatically deactivates on touch devices or when reduced motion is preferred.
+ */
 export function CustomCursor() {
   const cursorRef = useRef<HTMLDivElement>(null);
   const followerRef = useRef<HTMLDivElement>(null);
-  const [label, setLabel] = useState('SCROLL');
+  const [label, setLabel] = useState('EXPLORE');
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (window.matchMedia('(pointer: coarse)').matches) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (typeof window.matchMedia === 'function') {
+      if (window.matchMedia('(pointer: coarse)').matches) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    }
 
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
@@ -37,8 +44,8 @@ export function CustomCursor() {
 
         if (target.closest('button, a, input, [role="button"], [role="slider"]')) {
           setLabel('INTERACT');
-        } else if (target.closest('#reels')) {
-          setLabel('CLICK FOR SOUND');
+        } else if (target.closest('#showcase-reel') || target.closest('#latest-work')) {
+          setLabel('VIEW');
         } else {
           setLabel('EXPLORE');
         }
@@ -88,7 +95,7 @@ export function CustomCursor() {
         zIndex: 99999,
       }}
     >
-      {/* Precision Inverted Pinpoint */}
+      {/* Precision cursor dot */}
       <div
         ref={cursorRef}
         style={{
@@ -105,7 +112,7 @@ export function CustomCursor() {
         }}
       />
 
-      {/* Modern Badge Follower */}
+      {/* Dynamic context badge follower */}
       <div
         ref={followerRef}
         style={{

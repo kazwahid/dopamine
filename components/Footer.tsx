@@ -1,130 +1,300 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 
+/**
+ * Studio Footer Component
+ * Scroll-driven brandmark scaling, ambient video backdrop, and studio directory.
+ */
 export function Footer() {
+  const containerRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Initialize backdrop video autoplay
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+    vid.muted = true;
+    vid.defaultMuted = true;
+    vid.playsInline = true;
+    try {
+      const playPromise = vid.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {});
+      }
+    } catch {}
+  }, []);
+
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Scroll progress for pinned footer animation
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end'],
+  });
+
+  // Title scale animation
+  const rawScale = useTransform(
+    scrollYProgress,
+    [0.0, 0.08, 0.58, 0.78, 1.0],
+    [0.34, 0.36, 0.92, 0.92, 0.88]
+  );
+  const scale = useSpring(rawScale, { stiffness: 90, damping: 24, mass: 0.45 });
+
+  // Letter spacing animation
+  const rawLetterSpacing = useTransform(
+    scrollYProgress,
+    [0.0, 0.08, 0.58, 0.78, 1.0],
+    ['-0.052em', '-0.050em', '-0.048em', '-0.048em', '-0.052em']
+  );
+  const letterSpacing = useSpring(rawLetterSpacing, { stiffness: 90, damping: 24, mass: 0.45 });
+
+  // Vertical position offset
+  const rawY = useTransform(
+    scrollYProgress,
+    [0.0, 0.08, 0.58, 0.78, 1.0],
+    [12, 10, 0, 0, -8]
+  );
+  const y = useSpring(rawY, { stiffness: 90, damping: 24, mass: 0.45 });
+
+  // Ambient backdrop glow
+  const rawGlow = useTransform(
+    scrollYProgress,
+    [0.08, 0.58, 0.78, 1.0],
+    [0, 0.32, 0.32, 0.82]
+  );
+  const glowOpacity = useSpring(rawGlow, { stiffness: 90, damping: 24 });
+
+  const rawGlowScale = useTransform(
+    scrollYProgress,
+    [0.78, 1.0],
+    [1.0, 1.3]
+  );
+  const glowScale = useSpring(rawGlowScale, { stiffness: 85, damping: 22 });
+
+  // Video backdrop parallax
+  const rawVideoScale = useTransform(
+    scrollYProgress,
+    [0.0, 0.58, 0.78, 1.0],
+    [1.08, 1.0, 1.0, 0.95]
+  );
+  const videoScale = useSpring(rawVideoScale, { stiffness: 90, damping: 24 });
+
+  const rawVideoOpacity = useTransform(
+    scrollYProgress,
+    [0.0, 0.78, 1.0],
+    [0.88, 0.88, 0.45]
+  );
+  const videoOpacity = useSpring(rawVideoOpacity, { stiffness: 90, damping: 24 });
+
+  // Bottom column strip exit transition
+  const rawStripOpacity = useTransform(
+    scrollYProgress,
+    [0.72, 0.90],
+    [1.0, 0.0]
+  );
+  const stripOpacity = useSpring(rawStripOpacity, { stiffness: 90, damping: 24 });
+
+  const rawStripY = useTransform(
+    scrollYProgress,
+    [0.72, 0.90],
+    [0, 18]
+  );
+  const stripY = useSpring(rawStripY, { stiffness: 90, damping: 24 });
+
   return (
     <footer
+      id="footer"
+      ref={containerRef}
       aria-label="Studio Footer"
-      className="relative w-full bg-black text-white select-none flex flex-col justify-end pt-32 pb-10 px-6 sm:px-12 md:px-16 border-t border-white/10"
-      style={{ backgroundColor: '#000000', color: '#FFFFFF' }}
+      className="footer-studio"
     >
-      <div className="w-full flex flex-col md:flex-row items-center md:items-end justify-between gap-8 md:gap-4 font-mono-thin text-[11px] tracking-wider uppercase">
-        {/* Social Links */}
-        <div className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-start">
-          <span className="font-bold text-white tracking-widest text-xs">MADE WITH LOVE</span>
-
-          <div className="flex items-center gap-1.5 text-white/80">
-            {/* Instagram */}
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="p-1.5 rounded hover:bg-white/10 hover:text-white transition-colors flex items-center justify-center"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-              </svg>
-            </a>
-
-            {/* X / Twitter */}
-            <a
-              href="https://x.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="X (Twitter)"
-              className="p-1.5 rounded hover:bg-white/10 hover:text-white transition-colors flex items-center justify-center"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-            </a>
-
-            {/* LinkedIn */}
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
-              className="p-1.5 rounded hover:bg-white/10 hover:text-white transition-colors flex items-center justify-center"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-              </svg>
-            </a>
-
-            {/* Vimeo */}
-            <a
-              href="https://vimeo.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Vimeo"
-              className="p-1.5 rounded hover:bg-white/10 hover:text-white transition-colors flex items-center justify-center"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M22.396 7.164c-.093 2.026-1.507 4.799-4.245 8.32-2.839 3.676-5.244 5.515-7.215 5.515-1.229 0-2.274-1.135-3.136-3.406l-1.708-6.26c-.636-2.275-1.32-3.412-2.052-3.412-.159 0-.713.33-1.662.99l-.99-1.27c1.077-.946 2.14-1.895 3.19-2.846 1.45-1.246 2.53-1.896 3.24-1.948 1.684-.136 2.723.977 3.116 3.339.467 2.81 1.002 5.068 1.605 6.772.603 1.704 1.258 2.556 1.966 2.556.559 0 1.298-.827 2.217-2.482.918-1.655 1.41-2.909 1.474-3.76.136-1.405-.41-2.107-1.637-2.107-.584 0-1.182.13-1.794.39 1.205-3.957 3.504-5.857 6.899-5.702 2.518.114 3.695 1.714 3.535 4.801z" />
-              </svg>
-            </a>
-          </div>
+      <div className="footer-studio__sticky">
+        {/* Video Backdrop */}
+        <div className="footer-studio__video-backdrop" aria-hidden="true">
+          <motion.video
+            ref={videoRef}
+            src="/media/footer.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            style={{ scale: videoScale, opacity: videoOpacity }}
+            className="footer-studio__video"
+          />
+          <div className="footer-studio__video-overlay" />
         </div>
 
-        {/* Studio Mark & Metadata */}
-        <div className="flex flex-col items-center text-center space-y-0.5 leading-tight">
-          <a
-            href="/about"
-            className="text-xl sm:text-2xl font-black normal-case text-white leading-none hover:opacity-80 transition-opacity inline-block mb-1"
+        {/* Ambient Glow */}
+        <motion.div
+          style={{ opacity: glowOpacity, scale: glowScale }}
+          className="footer-studio__ambient-glow"
+          aria-hidden="true"
+        />
+
+        {/* Bottom Information Strip */}
+        <motion.div
+          style={{ opacity: stripOpacity, y: stripY }}
+          className="footer-studio__bottom-strip"
+        >
+          {/* Left Column: Legal */}
+          <div className="footer-studio__bottom-left">
+            <div className="footer-studio__legal-block">
+              <span className="footer-studio__legal-line">
+                <span className="footer-studio__legal-pill">[ &copy; 2026 ]</span>{' '}
+                <span>DOPAMINE STUDIO</span>
+              </span>
+              <span className="footer-studio__legal-line">
+                <span className="footer-studio__legal-slash">//</span>{' '}
+                <span>ALL RIGHTS RESERVED</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Center Column: Studio Details & Socials */}
+          <div className="footer-studio__lockup">
+            <div className="footer-studio__lockup-line">
+              SINCE 2026
+            </div>
+            <div className="footer-studio__lockup-line">
+              CREATIVE DIRECTION &amp; DIGITAL LAB
+            </div>
+            <div className="footer-studio__lockup-line">
+              <span className="footer-studio__lockup-box">REMOTELY</span> / WORLDWIDE
+            </div>
+            <div className="footer-studio__lockup-quote">
+              &ldquo;IT&rsquo;S A VIBE&rdquo;
+            </div>
+
+            {/* Social Links */}
+            <nav className="footer-studio__socials" aria-label="Social Channels">
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-studio__social-icon-link"
+                aria-label="Instagram"
+              >
+                <svg
+                  className="footer-studio__social-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                </svg>
+              </a>
+
+              <a
+                href="https://x.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-studio__social-icon-link"
+                aria-label="Twitter / X"
+              >
+                <svg
+                  className="footer-studio__social-icon"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </a>
+
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-studio__social-icon-link"
+                aria-label="LinkedIn"
+              >
+                <svg
+                  className="footer-studio__social-icon"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
+                </svg>
+              </a>
+
+              <a
+                href="https://tiktok.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-studio__social-icon-link"
+                aria-label="TikTok"
+              >
+                <svg
+                  className="footer-studio__social-icon"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.29 0 .58.04.85.12V9.4a6.33 6.33 0 0 0-.85-.06A6.34 6.34 0 0 0 3.14 15.7a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.58a8.28 8.28 0 0 0 4.77 1.52v-3.41z" />
+                </svg>
+              </a>
+            </nav>
+
+            {/* Back to Top */}
+            <button
+              type="button"
+              onClick={handleScrollToTop}
+              className="footer-studio__top-minimal"
+              aria-label="Scroll to top of page"
+            >
+              <span>BACK TO TOP</span>
+              <span aria-hidden="true">&uarr;</span>
+            </button>
+          </div>
+
+          {/* Right Column: Inquiries */}
+          <div className="footer-studio__bottom-right">
+            <div className="footer-studio__inquiries-block">
+              <span className="footer-studio__inquiries-label">DIRECT INQUIRIES</span>
+              <a
+                href="mailto:contact@dopamine.agency"
+                className="footer-studio__email-minimal"
+              >
+                contact@dopamine.agency
+              </a>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Giant Scroll-Animated Title */}
+        <div className="footer-studio__monument">
+          <motion.div
             style={{
-              fontFamily: 'var(--font-sans)',
-              fontWeight: 900,
-              letterSpacing: '-0.05em',
+              scale,
+              letterSpacing,
+              y,
+              transformOrigin: 'bottom center',
             }}
+            className="footer-studio__giant-wrap"
           >
-            dopamine<span className="text-xs align-top ml-0.5 font-normal">&copy;</span>
-          </a>
-          <span className="text-[11px] text-white/80">SINCE 2026</span>
-          <span className="text-[11px] text-white/80">DESIGNED / CURATED</span>
-          <div className="text-[11px] text-white/80">
-            <span className="border border-white/60 px-1.5 py-0.2 rounded-sm text-[10px] font-bold">
-              REMOTELY
-            </span>{' '}
-            / WORLDWIDE
-          </div>
-          <span className="text-[11px] text-white/70 pt-0.5">
-            &ldquo;IT&rsquo;S A VIBE&rdquo;
-          </span>
-        </div>
-
-        {/* Colophon & Studio Monogram */}
-        <div className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-end text-[10px] text-white/70">
-          <span>
-            SITE BY{' '}
             <a
-              href="https://qaziwahid.netlify.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-bold text-white hover:underline underline-offset-4 transition-all"
+              href="/"
+              className="footer-studio__giant-title"
+              aria-label="Dopamine Home"
             >
-              QAZIWAHID
+              dopamine<span className="footer-studio__giant-copy">&copy;</span>
             </a>
-            , <span className="text-white/80">STUDIO</span>
-          </span>
-
-          <div
-            className="w-6 h-6 rounded-full border border-white/30 bg-white/10 flex items-center justify-center text-white shrink-0 hover:border-white transition-colors"
-            title="Dopamine"
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z" />
-            </svg>
-          </div>
+          </motion.div>
         </div>
       </div>
     </footer>
   );
 }
 
-// Alias for compatibility
 export const JamsFooter = Footer;

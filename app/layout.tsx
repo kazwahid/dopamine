@@ -3,16 +3,16 @@ import './globals.css';
 import { brand } from '@/lib/brand';
 
 export const metadata: Metadata = {
-  title: 'dopamine© — Big Vision Thinking, Pure Reel Attitude',
+  title: 'Dopamine studio',
   description: 'Pure media architecture. Four sequences engineered for sensory immersion.',
   openGraph: {
-    title: 'dopamine©',
+    title: 'Dopamine studio',
     description: 'Pure media architecture. Four sequences engineered for sensory immersion.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'dopamine©',
+    title: 'Dopamine studio',
     description: 'Pure media architecture. Four sequences engineered for sensory immersion.',
   },
   icons: {
@@ -40,7 +40,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@300;400;500;700;800&family=Space+Grotesk:wght@500;700;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Lora:ital,wght@0,500;0,600;1,500&family=Martian+Mono:wght@300;400;500;700;800&family=Mrs+Saint+Delafield&family=Outfit:wght@500;600;700&family=Pinyon+Script&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;700;900&display=swap"
           rel="stylesheet"
         />
       </head>

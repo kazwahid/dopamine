@@ -1,22 +1,19 @@
-export type Scene = {
+/**
+ * Core Type Definitions
+ * Shared types for Dopamine Cinema Studio architecture and media systems.
+ */
+
+export interface WorkProject {
   id: string;
   title: string;
-  kicker: string;
-  src: string;
-  poster: string;
-  accent: 'violet' | 'cyan' | 'amber';
+  client: string;
+  year: string;
+  category: string;
+  mediaSrc: string;
   description: string;
-};
+}
 
-export type ToolStatus =
-  | 'input-streaming'
-  | 'input-available'
-  | 'output-available'
-  | 'output-error';
-
-export type ToolResult = {
-  title: string;
-  confidence: number;
-  tags: string[];
-  recommendation: string;
-};
+export interface InquiryFormData {
+  email: string;
+  scope: string;
+}

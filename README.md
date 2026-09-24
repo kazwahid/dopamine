@@ -1,40 +1,56 @@
-# CINEMA·LAB
+# DOPAMINE© — Studio Showcase
 
-A polished Next.js showcase built around two Higgsfield-generated video sequences. It combines a cinematic reel, a real Three.js scene, a stateful motion button, a typed AI tool lifecycle, failure states, and an accessibility/performance audit trail.
+A high-performance media showcase platform crafted with Next.js 16, React 19, and Framer Motion. Engineered with immersive video kinetics, responsive typography, and minimalist design architecture.
 
-## Run
+## Overview
 
+Dopamine Studio is an experiential showcase platform featuring:
+- **Hero Landmark (`Hero.tsx`):** Seamless typography, interactive reel navigation, and depth parallax.
+- **Showcase Reel (`ShowcaseReel.tsx`):** Center-expanding scroll zoom reveal, inline video controls, scrub timeline, and fullscreen modal mode.
+- **Editorial Work Portfolio (`LatestWork.tsx`):** Two-tier dual-parallax grid highlighting creative projects.
+- **Agency Capabilities (`AgencySection.tsx`):** Interactive capabilities cards detailing core disciplines.
+- **Campaign Contact (`Contact.tsx`):** Video backdrop, dynamic typographic watermark, direct mail dispatch, and campaign inquiry modal.
+- **Studio Footer (`Footer.tsx`):** Minimalist, high-impact design featuring scroll-driven title expansion, direct inquiries CTA, and studio directory.
+
+## Getting Started
+
+### Prerequisites
+- Node.js 20+
+- npm or pnpm
+
+### Installation
 ```bash
 npm install
-npm run dev
 ```
 
-Open `http://localhost:3000`.
+### Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-The AI chat works in **demo mode** without a key. To connect a real model, copy `.env.example` to `.env.local` and add `OPENAI_API_KEY`.
+### Production Build
+```bash
+npm run build
+npm start
+```
 
-## What maps to the assignments
+### Running Tests
+```bash
+# Run unit & integration test suite
+npm run test
 
-- **Audit:** `AUDIT.md`, semantic landmarks, focus states, labels, live chat output, keyboard stop, reduced motion, compressed media.
-- **3D:** `components/ThreeScene.tsx` uses Three.js, has a meaningful material/light switch, DPR cap, low-power renderer, and fallback copy.
-- **Buttons with a Brain:** `components/MotionButton.tsx` has idle, hover/focus, loading, success, error, and disabled behavior with reduced-motion support.
-- **Testing:** Vitest + React Testing Library cover motion states, tool states, keyboard focus, and failure behavior. Playwright covers the primary flow. CI is in `.github/workflows/ci.yml`.
-- **Failure handling:** `app/error.tsx`, demo AI fallback, tool sabotage, retryable motion states, and empty-input validation.
-- **Generative UI:** `lib/tool.ts` defines a Zod-backed `scoreScene` server tool; `ToolCard` renders input-streaming, input-available, output-available, and output-error distinctly.
+# Run end-to-end Playwright tests
+npm run e2e
+```
 
-## Tool contract
+## Architecture & Design System
 
-`scoreScene({ scene: 'ring' | 'morning', goal: string })` → `{ title, confidence, tags[], recommendation }`.
+- **Framework:** Next.js 16 (App Router) + React 19
+- **Motion & Physics:** Framer Motion with scroll-linked spring transforms
+- **Styling:** Modular CSS architecture with dark-mode contrast standards
+- **Typography:** Martian Mono, Space Grotesk, and Inspire Mono
+- **Accessibility:** Semantic landmarks (`header`, `nav`, `main`, `section`, `footer`), skip links, accessible ARIA attributes, and reduced-motion detection.
 
-The tool intentionally throws when the goal contains `fail`, making the error state easy to demonstrate.
-
-## Performance note
-
-The original uploads were 31 MB and 19 MB. Production copies are about 2.1 MB and 0.64 MB at 960px H.264 with `faststart`. The 3D renderer caps device pixel ratio at 1.5 and uses `powerPreference: low-power`.
-
-## What I would add with more time
-
-- WebVTT captions and transcript search for both videos.
-- AV1/WebM variants with `<source>` negotiation.
-- Real tool-result streaming rendered directly from AI SDK UI messages.
-- A deployment-time Lighthouse/WAVE CI job and real before/after screenshots.
+## License
+All rights reserved © 2026 DOPAMINE STUDIO INC.

@@ -1,17 +1,110 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { CustomCursor } from '@/components/CustomCursor';
+import { FoundersSection } from '@/components/FoundersSection';
 
+const MEDIA_LOGOS = [
+  { id: 'higgsfield', file: 'higgsfield.svg', name: 'higgsfield' },
+  { id: 'claude', file: 'claude.svg', name: 'Claude' },
+  { id: 'adobe', file: 'adobe.svg', name: 'Adobe' },
+  { id: 'figma', file: 'figma.svg', name: 'Figma' },
+  { id: 'capcut', file: 'capcut.svg', name: 'CapCut' },
+  { id: 'nanobanana', file: 'nanobanana.svg', name: 'Nano Banana' },
+  { id: 'aionlabs', file: 'aionlabs.svg', name: 'AionLabs' },
+  { id: 'notion', file: 'notion.svg', name: 'Notion' },
+  { id: 'gemini', file: 'gemini.svg', name: 'Gemini' },
+  { id: 'v0', file: 'v0.svg', name: 'v0' },
+];
+
+const SERVICES_DATA = [
+  {
+    id: 'brand-strategy',
+    title: 'Brand Strategy',
+    description:
+      'Brand strategy defines your vision, purpose, and market position. Clear, conscious frameworks that direct communication and drive engagement.',
+    image: '/media/agency/037.jpg',
+  },
+  {
+    id: 'digital-branding',
+    title: 'Digital-First Branding',
+    description:
+      'We build your brand identity from the ground up. Driven by market trends and style, we ensure your brand leaves an unforgettable impression.',
+    image: '/media/agency/outfit.jpg',
+  },
+  {
+    id: 'motion-video',
+    title: 'Motion Video & Animation',
+    description:
+      'Motion visuals for modern brands and digital products. Micro-interactions, 3D animations, and brand films that bring ideas vibrantly to life.',
+    image: '/media/agency/050.jpg',
+  },
+  {
+    id: 'web-development',
+    title: 'Web Development',
+    description:
+      'We turn websites into immersive digital experiences. Cinematic, high-performance platforms brought alive through motion and purpose.',
+    image: '/media/agency/048.jpg',
+  },
+  {
+    id: 'social-media',
+    title: 'Social Media Marketing',
+    description:
+      'We craft high-energy visual content that boosts brand presence. Trend-forward storytelling with sick AI motion that makes your brand feel alive.',
+    image: '/media/agency/gym3.jpg',
+  },
+];
+
+const SERVICES_LIST = [
+  'Social Media Marketing',
+  'Brand Strategy',
+  'Digital-First Branding',
+  'Motion Video & Animation',
+  'Web Development',
+];
+
+
+const STUDIO_DNA_LIST = [
+  'HUMAN FIRST',
+  'International — Partnerships',
+  'Independent Studio',
+  'Zero Outsourcing',
+  'AI-Native Workflow',
+];
+
+/**
+ * Studio About & Editorial Page
+ * Full enterprise-width layout consistent with the main page:
+ * - Persistent global sticky header
+ * - Expansive typographic hero statement
+ * - Core services pillars
+ * - Founders showcase with vector signatures
+ * - Studio Information, Services, Clients, Studio DNA grid under Founders
+ * - Halftone manifesto callout
+ * - Masterpiece digital runway footer
+ */
 export default function AboutPage() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [activeServiceId, setActiveServiceId] = useState<string | null>(null);
+  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  // Scroll-linked parallax depth for the hero section
+  const { scrollYProgress: heroScroll } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start'],
+  });
+
+  const yHeroTop = useTransform(heroScroll, [0, 1], [0, -80]);
+  const yHeroBottom = useTransform(heroScroll, [0, 1], [0, -40]);
+  const opacityHero = useTransform(heroScroll, [0, 0.85], [1, 0.2]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      // Subtle normalized offset (-1 to 1) for kinetic floating elements
+      // Normalized offset (-1 to 1) for kinetic floating elements
       const x = (e.clientX / window.innerWidth - 0.5) * 2;
       const y = (e.clientY / window.innerHeight - 0.5) * 2;
       setMousePos({ x, y });
@@ -26,96 +119,68 @@ export default function AboutPage() {
         Skip to main content
       </a>
 
-      {/* Dynamic Monochrome Cursor */}
+      {/* Custom cursor */}
       <CustomCursor />
+
+      {/* Global Consistent Header throughout the entire website */}
+      <Header />
 
       <main
         id="about-content"
-        className="relative w-full min-h-screen bg-black text-white select-none overflow-x-hidden"
+        className="relative w-full min-h-screen bg-black text-white select-none overflow-x-clip"
         style={{
           backgroundColor: '#000000',
           color: '#FFFFFF',
           fontFamily: 'var(--font-sans)',
         }}
       >
-        {/* Top Header Navigation */}
-        <header className="relative z-20 flex items-start justify-between w-full p-6 sm:p-10 md:p-14 font-mono-thin text-xs uppercase tracking-wider">
-          {/* Left: Brand Logo */}
-          <Link href="/" className="flex items-center group">
-            <span
-              className="text-2xl sm:text-3xl font-black normal-case text-white leading-none group-hover:opacity-80 transition-opacity"
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontWeight: 900,
-                letterSpacing: '-0.05em',
-              }}
+        {/* Full-Page Cinematic Ambient Backdrop on Hover */}
+        <AnimatePresence>
+          {hoveredImage && (
+            <motion.div
+              key={hoveredImage}
+              initial={{ opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.02 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
+              aria-hidden="true"
             >
-              dopamine<span className="text-sm align-top ml-0.5 font-normal">&copy;</span>
-            </span>
-          </Link>
-
-          {/* Center: Nav Columns */}
-          <nav className="flex items-start gap-8 sm:gap-16 text-xs sm:text-[13px] font-mono-thin tracking-widest uppercase">
-            <div className="flex flex-col space-y-1.5">
-              <Link href="/" className="text-white hover:opacity-75 transition-opacity text-left">
-                HOME
-              </Link>
-              <Link href="/#reels" className="text-white hover:opacity-75 transition-opacity text-left">
-                WORK[03]
-              </Link>
-            </div>
-
-            <div className="flex flex-col space-y-1.5">
-              <span className="flex items-center gap-2 text-white font-medium">
-                <span className="w-1.5 h-1.5 bg-white inline-block rounded-full" /> ABOUT
-              </span>
-              <Link href="/#contact" className="text-white hover:opacity-75 transition-opacity">
-                CONTACT
-              </Link>
-            </div>
-          </nav>
-
-          {/* Right: Tagline (Matches Main Page Header) */}
-          <div className="hidden sm:block text-right font-mono-thin text-[11px] sm:text-xs tracking-widest text-white uppercase">
-            <div>ONLY THE</div>
-            <div className="font-bold text-white">STRONG EVOLVE</div>
-          </div>
-        </header>
-
-        {/* Section A: Hero */}
+              <img
+                src={hoveredImage}
+                alt=""
+                className="w-full h-full object-cover brightness-[0.68] contrast-[1.14]"
+              />
+              {/* Cinematic overlays to guarantee immaculate contrast & legibility */}
+              <div className="absolute inset-0 bg-black/45" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/65" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {/* Hero section — Standard container matching main page width */}
         <div
-          className="max-w-7xl mx-auto px-6 sm:px-10 md:px-14 lg:px-16 pt-8 sm:pt-14 md:pt-20 about-hero-container about-space-before-divider"
-          style={{ paddingBottom: '9rem' }}
+          ref={heroRef}
+          className="about-page-container about-hero-container about-space-before-divider"
         >
-          {/* Top Statement: Left Aligned */}
-          <div className="about-hero-top">
-            <h1
-              className="text-5xl sm:text-7xl md:text-8xl lg:text-[7.2rem] xl:text-[8.5rem] font-black uppercase leading-[0.84] tracking-tight text-white m-0 p-0"
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontWeight: 900,
-                WebkitTextStroke: '2px #FFFFFF',
-                letterSpacing: '-0.04em',
-              }}
-            >
+          {/* Primary statement with parallax depth */}
+          <motion.div
+            style={{ y: yHeroTop, opacity: opacityHero }}
+            className="about-hero-top"
+          >
+            <h1 className="about-hero-title">
               WE TURN<br />
-              CULTURAL<br />
-              VALUE
+              RAW VISION
             </h1>
-          </div>
+          </motion.div>
 
-          {/* Bottom Statement: Right Aligned */}
-          <div className="about-hero-bottom-wrap" style={{ marginTop: '0.25rem' }}>
-            <div className="about-hero-bottom">
-              <h2
-                className="text-5xl sm:text-7xl md:text-8xl lg:text-[7.2rem] xl:text-[8.5rem] font-black uppercase leading-[0.84] tracking-tight text-white m-0 p-0 text-left md:text-right"
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontWeight: 900,
-                  WebkitTextStroke: '2px #FFFFFF',
-                  letterSpacing: '-0.04em',
-                }}
-              >
+          {/* Secondary statement with differential parallax */}
+          <div className="about-hero-bottom-wrap">
+            <motion.div
+              style={{ y: yHeroBottom, opacity: opacityHero }}
+              className="about-hero-bottom"
+            >
+              <h2 className="about-hero-title text-left md:text-right">
                 <span className="inline-flex items-center">
                   <motion.span
                     animate={{
@@ -128,325 +193,182 @@ export default function AboutPage() {
                       x: { type: 'spring', damping: 20, stiffness: 100 },
                       y: { type: 'spring', damping: 20, stiffness: 100 },
                     }}
-                    className="about-hero-dot w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-full shrink-0"
-                    style={{
-                      width: 'clamp(1.5rem, 3.5vw, 3.5rem)',
-                      height: 'clamp(1.5rem, 3.5vw, 3.5rem)',
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: '50%',
-                      display: 'inline-block',
-                      flexShrink: 0,
-                      marginRight: 'clamp(0.625rem, 1.4vw, 1.5rem)',
-                    }}
+                    className="about-hero-dot"
                     aria-hidden="true"
                   />
                   <span>INTO</span>
                 </span>
                 <br />
-                COMPANY<br />
-                VALUE
+                CULTURAL<br />
+                POWER
               </h2>
 
-              {/* Studio Introduction */}
-              <div className="about-hero-intro" style={{ maxWidth: '640px' }}>
-                <p
-                  className="text-xl sm:text-2xl md:text-3xl font-normal leading-relaxed text-white"
-                  style={{ fontFamily: 'var(--font-sans)', lineHeight: 1.45 }}
-                >
-                  <strong className="font-black text-white">DOPAMINE&copy;</strong> is an independent creative studio engineered for high-impact media, brand systems, and modern digital direction. We build work calibrated to capture, hold, and convert human attention in a fragmented world.
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Services section */}
+        <section className="about-page-container about-services-section">
+          
+          <div className="about-services-content-wrap">
+            {/* Studio Statement / Sub-headline from Hero */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+              className="about-services-intro"
+            >
+              <p className="about-services-intro-p">
+                <strong className="font-black text-white">DOPAMINE&copy;</strong> is an independent creative studio engineered for bold brands. We fuse cinema, strategic identity, and digital motion to create work that commands attention and defines modern culture.
+              </p>
+            </motion.div>
+
+            {/* Meta Row: Our Services | Est. 2026© */}
+            <div className="about-services-meta-row">
+              <div className="about-services-meta-left">
+                <span>Our Services</span>
+              </div>
+              <div className="about-services-meta-right">
+                <span>Est. 2026&copy;</span>
+              </div>
+            </div>
+
+            {/* Split Layout: 5 Service Blocks (Left) + Editorial Narrative (Right) */}
+            <div className="about-services-split">
+              {/* Left: 5 Interactive Service Boxes with Hover Reveal */}
+              <div className="about-services-blocks">
+                {SERVICES_DATA.map((service, index) => {
+                  const isActive = activeServiceId === service.id;
+                  return (
+                    <motion.div
+                      key={service.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.15 }}
+                      transition={{
+                        duration: 0.65,
+                        delay: index * 0.08,
+                        ease: [0.16, 1, 0.3, 1],
+                      }}
+                      className={`about-service-box ${isActive ? 'is-active' : ''}`}
+                      onMouseEnter={() => {
+                        setActiveServiceId(service.id);
+                        setHoveredImage(service.image);
+                      }}
+                      onMouseLeave={() => {
+                        setActiveServiceId(null);
+                        setHoveredImage(null);
+                      }}
+                      onClick={() => {
+                        setActiveServiceId((prev) => {
+                          const next = prev === service.id ? null : service.id;
+                          setHoveredImage(next ? service.image : null);
+                          return next;
+                        });
+                      }}
+                      tabIndex={0}
+                      role="region"
+                      aria-label={`${service.title} capabilities`}
+                      data-cursor="[ EXPAND ]"
+                    >
+                      <div className="about-service-box__header">
+                        <h3 className="about-service-box__title">{service.title}</h3>
+                        <span className="about-service-box__tap-indicator" aria-hidden="true">
+                          <span className="about-service-box__tap-icon">+</span>
+                        </span>
+                      </div>
+                      <div className="about-service-box__desc-wrap">
+                        <p className="about-service-box__desc">
+                          {service.description}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Right: Editorial Narrative Column */}
+              <div className="about-services-editorial">
+                <p>
+                  Every brand is already in motion. Processes, people, perception, decisions. Our job isn&apos;t to sit on top of it. It&apos;s to step inside.
+                </p>
+                <p>
+                  We work alongside teams, read the business and culture, identify where attention is being lost and where it needs to be amplified. We don&apos;t operate in silos: design, technology, motion and strategy move together, because that&apos;s how growth becomes sustainable.
+                </p>
+                <p>
+                  With in-house craft collaborating in real time, we reduce friction, align decisions and turn complexity into structure. We don&apos;t add noise. We bring direction.
                 </p>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Section B: Capabilities */}
-        <section className="max-w-7xl mx-auto px-6 sm:px-10 md:px-14 lg:px-16">
-          {/* Section Divider (SEC. /B) */}
-          <div className="about-section-divider">
-            <div className="about-section-divider-line" />
-            <div className="about-section-divider-meta">
-              <div className="flex items-center gap-12 sm:gap-20">
-                <span className="font-bold">SEC.</span>
-                <span className="font-bold">/B</span>
-              </div>
-              <span className="about-section-divider-dot" />
-            </div>
-          </div>
-
-          {/* Consistent Great Space Before & After Capabilities Content */}
-          <div
-            className="about-space-after-divider"
-            style={{ paddingTop: '6rem', paddingBottom: '9rem' }}
-          >
-            {/* 3-Column Editorial Grid */}
-            <div className="about-capabilities-grid items-start">
-              {/* Column 1: CAPABILITIES (Clean natural thickness without text-stroke) */}
-              <div>
-                <h2
-                  className="text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight text-white leading-none"
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontWeight: 900,
-                    letterSpacing: '-0.03em',
-                  }}
-                >
-                  CAPABILITIES
-                </h2>
-              </div>
-
-              {/* Column 2: CX, COMMERCE, & PRODUCT DESIGN (Matching font of PEOPLE heading) */}
-              <div className="space-y-6">
-                <h3
-                  className="text-base sm:text-lg md:text-xl font-black uppercase tracking-wider text-white"
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontWeight: 900,
-                    letterSpacing: '0.04em',
-                  }}
-                >
-                  CX, COMMERCE, &amp;<br />PRODUCT DESIGN
-                </h3>
-
-                <ul
-                  className="space-y-4 text-[15px] sm:text-base text-white font-normal leading-snug about-capability-list"
-                  style={{ listStyle: 'none', listStyleType: 'none', paddingLeft: 0, marginLeft: 0 }}
-                >
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Market Analysis &amp; Business Cases</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Customer Research &amp; Segmentation</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Experience Strategy &amp; AI</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Journey Mapping &amp; Prototyping</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Digital Product Architecture</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>UI &amp; Interaction Design</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Design Systems &amp; Guidelines</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>E-Commerce Platforms &amp; Shopify</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Mobile &amp; Web App Engineering</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Full-Stack CMS Implementation</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Technical Direction &amp; Architecture</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Usability Validation &amp; Performance</li>
-                </ul>
-              </div>
-
-              {/* Column 3: DIGITAL-FIRST BRANDING (Matching font of PEOPLE heading) */}
-              <div className="space-y-6">
-                <h3
-                  className="text-base sm:text-lg md:text-xl font-black uppercase tracking-wider text-white"
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontWeight: 900,
-                    letterSpacing: '0.04em',
-                  }}
-                >
-                  DIGITAL-FIRST BRANDING
-                </h3>
-
-                <ul
-                  className="space-y-4 text-[15px] sm:text-base text-white font-normal leading-snug about-capability-list"
-                  style={{ listStyle: 'none', listStyleType: 'none', paddingLeft: 0, marginLeft: 0 }}
-                >
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Brand Ecosystem &amp; Roadmap</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Strategic Brand Intelligence</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Positioning &amp; Architecture</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Brand Voice &amp; Narrative</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Visual Identity Systems</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Brand Guidelines &amp; Playbooks</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Art Direction &amp; Editorial Design</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Graphic &amp; Typographic Systems</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>3D, Motion &amp; Video Production</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Naming &amp; Brand Architecture</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Go-To-Market Strategy</li>
-                  <li style={{ listStyle: 'none', listStyleType: 'none' }}>Multi-Platform Campaigns</li>
-                </ul>
-              </div>
-            </div>
-          </div>
         </section>
 
-        {/* Section C: Agency Snapshot */}
-        <section className="max-w-7xl mx-auto px-6 sm:px-10 md:px-14 lg:px-16">
+        {/* Studio snapshot section — Standard container matching main page width */}
+        <section className="about-page-container">
           <div className="w-full h-[1px]" style={{ backgroundColor: '#FFFFFF' }} />
 
-          {/* Studio Masthead & Axiom */}
-          <div className="py-6 sm:py-8 md:py-10 flex items-baseline justify-between">
-            <span
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black normal-case text-white leading-none inline-block select-none"
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontWeight: 900,
-                letterSpacing: '-0.05em',
-              }}
-            >
-              dopamine<span className="text-xl sm:text-2xl align-top ml-1 font-normal">&copy;</span>
-            </span>
 
-            <div className="text-right font-mono-thin text-xs sm:text-sm md:text-base tracking-widest text-white uppercase select-none">
-              <div>ONLY THE</div>
-              <div className="font-bold text-white">STRONG EVOLVE</div>
-            </div>
-          </div>
 
-          {/* Section Divider (SEC. /C) */}
-          <div className="about-section-divider">
-            <div className="about-section-divider-line" />
-            <div className="about-section-divider-meta">
-              <div className="flex items-center gap-12 sm:gap-20">
-                <span className="font-bold">SEC.</span>
-                <span className="font-bold">/C</span>
-              </div>
-              <span className="about-section-divider-dot" />
-            </div>
-          </div>
+          {/* Founders Showcase — Abstract Calligraphy & Intentional Placement */}
+          <FoundersSection />
 
-          {/* Agency Snapshot Overview */}
-          <div
-            className="about-space-after-divider"
-            style={{ paddingTop: '6rem', paddingBottom: '9rem' }}
-          >
-            <div className="about-snapshot-layout items-start">
-              {/* Heading */}
-              <div>
-                <h3
-                  className="text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight text-white leading-none"
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontWeight: 900,
-                    letterSpacing: '-0.03em',
-                  }}
-                >
-                  AGENCY<br />
-                  SNAPSHOT
-                </h3>
+          {/* Studio Thinking, Services & Studio DNA + Logos Grid (Matching Reference Photo) */}
+          <div className="about-studio-split-section">
+            {/* Subtle vertical pinstripe lines across the whole section matching reference photo */}
+
+            <div className="about-studio-split-layout">
+              {/* Left Side: Thinking & Studio in Horizontal Rows with Text Writing from the Right */}
+              <div className="about-studio-horizontal-rows">
+                {/* Horizontal Block 1: Thinking */}
+                <div className="about-horizontal-block">
+                  <div className="about-horizontal-label"> THINKING </div>
+                  <div className="about-horizontal-content">
+                    <p className="about-horizontal-text">
+                      The idea will always come first and guides everything that follows. A nuanced narrative that is strategically conscious and truly unexpected is what we use as a framework.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Horizontal Block 2: Studio */}
+                <div className="about-horizontal-block" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+                  <div className="about-horizontal-label"> STUDIO </div>
+                  <div className="about-horizontal-content">
+                    <ul className="about-horizontal-list">
+                      {STUDIO_DNA_LIST.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               </div>
 
-              {/* Column 2: Humble Yet Impactful Snapshot Cards Grid */}
-              <div className="about-snapshot-cards">
-                {/* Snapshot 1: PEOPLE (10+) */}
-                <div className="space-y-6">
-                  <div
-                    className="text-base sm:text-lg font-black uppercase tracking-wider text-white"
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontWeight: 900,
-                      letterSpacing: '0.04em',
-                    }}
-                  >
-                    PEOPLE
-                  </div>
-
-                  <div
-                    className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white leading-none"
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontWeight: 900,
-                      WebkitTextStroke: '2px #FFFFFF',
-                      letterSpacing: '-0.04em',
-                    }}
-                  >
-                    12+
-                  </div>
-
-                  <p className="text-base sm:text-lg text-white font-normal leading-relaxed pt-2">
-                    A tight collective of directors, designers, and media architects devoted entirely to singular craft over headcount.
-                  </p>
-                </div>
-
-                {/* Snapshot 2: GLOBAL REACH (04) */}
-                <div className="space-y-6">
-                  <div
-                    className="text-base sm:text-lg font-black uppercase tracking-wider text-white"
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontWeight: 900,
-                      letterSpacing: '0.04em',
-                    }}
-                  >
-                    GLOBAL REACH
-                  </div>
-
-                  <div
-                    className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white leading-none"
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontWeight: 900,
-                      WebkitTextStroke: '2px #FFFFFF',
-                      letterSpacing: '-0.04em',
-                    }}
-                  >
-                    04
-                  </div>
-
-                  <p className="text-base sm:text-lg text-white font-normal leading-relaxed pt-2">
-                    Operating across Tokyo, London, Berlin, and New York with direct creative leadership on every assignment.
-                  </p>
-                </div>
-
-                {/* Snapshot 3: IN-HOUSE CRAFT*/}
-                <div className="space-y-6">
-                  <div
-                    className="text-base sm:text-lg font-black uppercase tracking-wider text-white"
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontWeight: 900,
-                      letterSpacing: '0.04em',
-                    }}
-                  >
-                    IN-HOUSE CRAFT
-                  </div>
-
-                  <div
-                    className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white leading-none"
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontWeight: 900,
-                      WebkitTextStroke: '2px #FFFFFF',
-                      letterSpacing: '-0.04em',
-                    }}
-                  >
-                    101%
-                  </div>
-
-                  <p className="text-base sm:text-lg text-white font-normal leading-relaxed pt-2">
-                    Every commission is executed directly by principal craftspeople with zero account layers and zero outsourcing.
-                  </p>
-                </div>
-
-                {/* Snapshot 4: ANNUAL COMMISSIONS (08) */}
-                <div className="space-y-6">
-                  <div
-                    className="text-base sm:text-lg font-black uppercase tracking-wider text-white"
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontWeight: 900,
-                      letterSpacing: '0.04em',
-                    }}
-                  >
-                    ANNUAL COMMISSIONS
-                  </div>
-
-                  <div
-                    className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white leading-none"
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontWeight: 900,
-                      WebkitTextStroke: '2px #FFFFFF',
-                      letterSpacing: '-0.04em',
-                    }}
-                  >
-                    08
-                  </div>
-
-                  <p className="text-base sm:text-lg text-white font-normal leading-relaxed pt-2">
-                    We intentionally cap our concurrent partnerships each year to ensure uncompromised devotion to every client.
-                  </p>
+              {/* Right Side: 4-Column Logo Grid from public/media/logos/ with Brand Wordmarks */}
+              <div className="about-studio-split__right">
+                <div className="about-logos-grid">
+                  {MEDIA_LOGOS.map((logo) => (
+                    <div key={logo.id} className="about-logo-cell">
+                      <img
+                        src={`/media/logos/${logo.file}`}
+                        alt={logo.name}
+                        className="about-logo-img"
+                        loading="lazy"
+                      />
+                      <span className={`about-logo-name about-logo-name--${logo.id}`}>
+                        {logo.name}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
+
 
 
         </section>
 
-        {/* Studio Footer */}
+        {/* Studio Digital Masterpiece Runway Footer */}
         <Footer />
       </main>
     </>

@@ -1,20 +1,18 @@
 import { test, expect } from '@playwright/test';
 
-test('primary flow is completable in fullscreen showcase reel', async ({ page }) => {
+test('primary user navigation flow across landing page and footer', async ({ page }) => {
   await page.goto('/');
 
-  // 1. Check brand heading
+  // 1. Verify brand heading and navigation landmark
   await expect(page.getByRole('heading', { name: /dopamine/i }).first()).toBeVisible();
 
-  // 2. Transition into the reels
-  await page.getByRole('button', { name: /dive into reels/i }).click();
+  // 2. Verify showcase and main section landmarks exist
+  await expect(page.getByLabel('Hero Section')).toBeVisible();
+  await expect(page.getByLabel('Contact Section')).toBeVisible();
+  await expect(page.getByLabel('Studio Footer')).toBeVisible();
 
-  // 3. Navigate with keyboard through sequences to finale
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowRight');
-
-  // 4. Check finale
-  await expect(page.getByRole('heading', { name: /dopaminnnne/i })).toBeVisible({ timeout: 6000 });
+  // 3. Verify footer impact statement and newsletter input
+  await expect(page.getByRole('heading', { name: /let's make an impact together/i })).toBeVisible();
+  const emailInput = page.getByPlaceholder('enter your email');
+  await expect(emailInput).toBeVisible();
 });

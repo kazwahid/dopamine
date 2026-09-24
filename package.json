@@ -1,5 +1,5 @@
 {
-  "name": "cinema-lab",
+  "name": "dopamine-studio",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -9,8 +9,7 @@
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "playwright test",
-    "audit": "lighthouse http://localhost:3000 --preset=desktop --output=html --output-path=./artifacts/lighthouse.html"
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.0",

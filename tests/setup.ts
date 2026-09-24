@@ -20,6 +20,30 @@ Object.defineProperty(global, 'IntersectionObserver', {
   value: MockIntersectionObserver,
 });
 
+if (typeof window !== 'undefined') {
+  window.scrollTo = vi.fn();
+
+  if (window.HTMLMediaElement) {
+    window.HTMLMediaElement.prototype.play = vi.fn().mockImplementation(() => Promise.resolve());
+    window.HTMLMediaElement.prototype.pause = vi.fn();
+    window.HTMLMediaElement.prototype.load = vi.fn();
+  }
+
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+}
+
 afterEach(() => {
   cleanup();
 });
